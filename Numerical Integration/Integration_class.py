@@ -22,6 +22,8 @@ class IntegrationClass:
             self.GaussLegendre()
         elif self.method is 'Lobatto':
             self.GaussLobatto()
+        elif self.method is 'Romberg':
+            self.Romberg()
 
     def MidpointRule(self):
         import numpy as np
@@ -109,8 +111,43 @@ class IntegrationClass:
         b = (self.maxv + self.minv)/2.
         self.I = a * np.dot(self.func(a*p + b), w)
 
+    def Romberg(self):
+        import numpy as np
+        import math
+        print 'Romberg integration'
+
+        tol = 0.001
+        M = 1
+        h = self.maxv - self.minv
+        err = 1
+        J = -1
+        R = np.zeros((4,4))
+        R[0, 0] = h * (self.func(self.maxv) + self.func(self.minv)) / 2.
+
+        while ((err > tol) & (J < 2)) | (J < 2):
+            J = J + 1
+            h = h/2.
+            s = 0
+
+            for p in range(1, M+1):
+
+                x = self.minv + h*(2*p - 1)
+                s = s + self.func(x)
+
+            R[J+1, 0] = R[J, 0]/2. + h*s
+            M = 2*M
+
+            for K in range(0, J+1):
+                R[J+1, K+1] = R[J+1, K] + (R[J+1, K] - R[J, K])/(math.pow(4.0, K+1) - 1)
+
+            err = np.abs(R[J, J] - R[J+1, J+1])
+
+        self.I = R[J+1, J+1]
+
+
+
 def f (x): return x*x*x*x
 
-Int = IntegrationClass(0, 1, 5, 'Lobatto', f)
+Int = IntegrationClass(0, 1, 10, 'Romberg', f)
 Int.integrate()
 print Int.I
