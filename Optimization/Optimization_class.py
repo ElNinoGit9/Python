@@ -1,116 +1,119 @@
 class OptimizationClass:
-    def __init__(self, minv, maxv, N, method, func):
+    def __init__(self, minv, maxv, tol, method, func):
         import numpy as np
         self.minv = minv
         self.maxv = maxv
-        self.N = N
+        self.tol = tol
         self.method = method
         self.func = f
-        self.dx = (maxv-minv)/float(N)
 
     def optimize(self):
 
         if self.method is 'GoldenSearch':
-            self.MidpointRule()
+            self.GoldenSearch()
         elif self.method is 'Fibonacci':
-            self.TrapeziodalRule()
+            self.Fibonacci()
         elif self.method is 'QuadraticInterpolation':
-            self.SimpsonsRule()
+            self.QuadraticInterpolation()
         elif self.method is 'NelderMead':
-            self.BoolesRule()
+            self.NelderMead()
         elif self.method is 'SteepestDescent':
-            self.GaussLegendre()
-        elif self.method is 'NewtonMethod':
-            self.GaussLobatto()
+            self.SteepestDescent()
+        elif self.method is 'Newton':
+            self.Newton()
 
-    def MidpointRule(self):
+    def GoldenSearch(self):
         import numpy as np
         print 'GoldenSearch'
 
-        gridMid = np.linspace(self.minv + self.dx/2., self.maxv - self.dx/2., self.N, endpoint=True)
+        a   = self.minv
+        b   = self.maxv
+        tol = self.tol
+        r1  = (np.sqrt(5) - 1)/2.
+        r2  = r1*r1
+        h   = a - b
+        ya  = self.func(a)
+        yb  = self.func(b)
+        c   = a + r2*h
+        d   = a + r1*h
+        yc  = self.func(c)
+        yd  = self.func(d)
 
-        self.I = self.dx * (np.sum(self.func(gridMid[0:])))
+        A = []
+        B = []
+        C = []
+        D = []
+        A.append(a)
+        B.append(b)
+        C.append(c)
+        D.append(d)
 
-    def TrapeziodalRule(self):
+        k = 0
+
+        while (np.abs(yb - ya) > tol) | (h > tol):
+            k = k + 1
+
+            if (yc < yd):
+                b = d
+                yb = yd
+                d = c
+                yd = yc
+                h = b - a
+                c = a + r2*h
+                yc = self.func(c)
+            else:
+                a = c
+                ya = yc
+                c = d
+                yc = yd
+                h = b - a
+                d = a + r1*h
+                yd = self.func(d)
+
+            A.append(a)
+            B.append(b)
+            C.append(c)
+            D.append(d)
+
+            dp = np.abs(b - a)
+            dy = np.abs(yb - ya)
+            p = a
+            yp = ya
+
+            if (yb < ya):
+                p = b
+                yp = yb
+
+            G = [np.transpose(A), np.transpose(B), np.transpose(C), np.transpose(A)]
+            S = [p, yp]
+            E = [dp, dy]
+
+        self.min  = S[1]
+        self.xmin = S[0]
+
+    def Fibonacci(self):
         import numpy as np
         print 'Fibonacci'
 
-        self.grid = np.linspace(self.minv, self.maxv, self.N + 1, endpoint=True)
-
-        self.I = self.dx * (np.sum(self.func(self.grid[1:-1])) + self.func(self.grid[0])/2. + self.func(self.grid[-1])/2.)
-
-    def SimpsonsRule(self):
+    def QuadraticInterpolation(self):
         import numpy as np
         print 'QuadraticInterpolation'
 
-        self.grid = np.linspace(self.minv, self.maxv, self.N + 1, endpoint=True)
-
-        self.I = 2.*self.dx/6. * (self.func(self.grid[0]) + 4*np.sum(self.func(self.grid[1:-1:2])) + 2*np.sum(self.func(self.grid[2:-1:2])) + self.func(self.grid[-1]))
-
-    def BoolesRule(self):
+    def NelderMead(self):
         import numpy as np
         print 'NelderMead'
 
-        self.grid = np.linspace(self.minv, self.maxv, self.N + 1, endpoint=True)
-
-        self.I = 2.*self.dx/45. * (7*self.func(self.grid[0]) + 32*np.sum(self.func(self.grid[1:-1:4])) \
-        + 12*np.sum(self.func(self.grid[2:-1:4])) + 32*np.sum(self.func(self.grid[3:-1:4])) \
-        + 14*np.sum(self.func(self.grid[4:-1:4])) + 7*self.func(self.grid[-1]))
-
-    def GaussLegendre(self):
+    def SteepestDescent(self):
         import numpy as np
         print 'SteepestDescent'
 
-        if self.N == 1:
-            p = np.array([0])
-            w = np.array([2])
-        elif self.N == 2:
-            p = np.array([0.57735, -.57735])
-            w = np.array([1, 1])
-        elif self.N == 3:
-            p = np.array([0, 0.774597, -0.774597])
-            w = np.array([0.888889, 0.555556, 0.555556])
-        elif self.N == 4:
-            p = np.array([0.339981, -0.339981, 0.861136, -0.861136])
-            w = np.array([0.652145, 0.652145, 0.347855, 0.347855])
-        elif self.N == 5:
-            p = np.array([0, 0.538469, -0.538469, 0.90618, -0.90618])
-            w = np.array([0.568889, 0.478629, 0.478629, 0.236927, 0.236927])
-        else:
-            print 'number of points undefined'
-
-        a = (self.maxv - self.minv)/2.
-        b = (self.maxv + self.minv)/2.
-        self.I = a * np.dot(self.func(a*p + b), w)
-
-    def GaussLobatto(self):
+    def Newton(self):
         import numpy as np
         print 'NewtonMethod'
 
-        if self.N == 3:
-            p = np.array([0, 1, -1])
-            w = np.array([4/3., 1/3., 1/3.])
-        elif self.N == 4:
-            p = np.array([np.sqrt(1/5.), -np.sqrt(1/5.), 1, -1])
-            w = np.array([5/6., 5/6., 1/6., 1/6.])
-        elif self.N == 5:
-            p = np.array([0, np.sqrt(3./7.), -np.sqrt(3./7.), 1, -1])
-            w = np.array([32/45., 49/90., 49/90., 1/10., 1/10.])
-        elif self.N == 6:
-            p = np.array([np.sqrt(1/3. - 2*np.sqrt(7)/21.), -np.sqrt(1/3. - 2*np.sqrt(7)/21.), np.sqrt(1/3. + 2*np.sqrt(7)/21.), -np.sqrt(1/3. + 2*np.sqrt(7)/21.), 1, -1])
-            w = np.array([(14 + np.sqrt(7))/30., (14 + np.sqrt(7))/30., (14 - np.sqrt(7))/30., (14 - np.sqrt(7))/30., 1/15., 1/15.])
-        elif self.N == 7:
-            p = np.array([0, np.sqrt(5/11. - 2/11.*np.sqrt(5/3.)), -np.sqrt(5/11. - 2/11.*np.sqrt(5/3.)), np.sqrt(5/11. + 2/11.*np.sqrt(5/3.)), -np.sqrt(5/11. + 2/11.*np.sqrt(5/3.)), 1, -1])
-            w = np.array([256/525., (124 + 7*np.sqrt(15))/350., (124 + 7*np.sqrt(15))/350., (124 - 7*np.sqrt(15))/350., (124 - 7*np.sqrt(15))/350., 1/21., 1/21.])
-        else:
-            print 'number of points undefined'
+import numpy as np
+def f (x): return np.sin(2*np.pi*x)
 
-        a = (self.maxv - self.minv)/2.
-        b = (self.maxv + self.minv)/2.
-        self.I = a * np.dot(self.func(a*p + b), w)
-
-def f (x): return x*x*x*x
-
-Opt = OptimizationClass(0, 1, 5, 'Lobatto', f)
+Opt = OptimizationClass(0, .9, 1e-8, 'GoldenSearch', f)
 Opt.optimize()
-print Int.I
+print 'minimum =', Opt.min, 'at x =', Opt.xmin
