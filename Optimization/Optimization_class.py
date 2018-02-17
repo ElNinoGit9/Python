@@ -1,9 +1,10 @@
 class OptimizationClass:
-    def __init__(self, minv, maxv, tol, method, func):
+    def __init__(self, minv, maxv, tol, N, method, func):
         import numpy as np
         self.minv = minv
         self.maxv = maxv
         self.tol = tol
+        self.N = N
         self.method = method
         self.func = f
 
@@ -283,6 +284,125 @@ class OptimizationClass:
         import numpy as np
         print 'NelderMead'
 
+        Nmin = 1
+        Nmax = self.N
+
+        V = np.matrix([[0., 0.], [0.1, 0.1], [1., -0.1]])
+
+        [mm, n] = np.shape(V)
+
+        Y = np.zeros(n+1)
+        P = np.zeros((Nmax, n))
+        Q = np.zeros(Nmax)
+
+        for k in range(0, n+1):
+
+            Y[k] = self.func(V[k,0], V[k,1])
+
+        mn = np.min(Y)
+        mx = np.max(Y)
+        lo = [i for i, j in enumerate(Y) if j == mn]
+        hi = [i for i, j in enumerate(Y) if j == mx]
+
+
+        li = hi[0] + 0
+        ho = lo[0] + 0
+
+        for j in range(0, n + 1):
+
+            if ((j != lo) & (j != hi)) & (Y[j] <= Y[li]):
+                li = j
+
+            if ((j != hi) & (j != lo)) & (Y[j] >= Y[ho]):
+                ho = j
+
+        cnt = 0
+
+        while ((Y[hi] > Y[lo] + self.tol) & (cnt < Nmax)) | (cnt < Nmin):
+
+            S = np.zeros(n)
+
+            for j in range(0, n + 1):
+
+                S = S + V[j,:]
+
+            M = (S - V[hi, :])/float(n)
+            R = 2*M - V[hi, :]
+            yR = self.func(R[0,0], R[0,1])
+
+            if (yR < Y[ho]):
+
+                if Y[li] < yR:
+
+                    V[hi, :] = R
+                    Y[hi] = yR
+
+                else:
+
+                    E = 2*R - M
+                    yE = self.func(E[0,0], E[0,1])
+
+                    if yE < Y[li]:
+
+                        V[hi, :] = E
+                        Y[hi] = yE
+
+                    else:
+
+                        V[hi, :] = R
+                        Y[hi] = yR
+
+            else:
+
+                if (yR < Y[hi]):
+
+                    V[hi, :] = R
+                    Y[hi] = yR
+
+                C = (V[hi, :] + M) / 2.
+                yC = self.func(C[0,0], C[0,1])
+                C2 = (M + R)/2.
+                yC2 = self.func(C2[0,0], C2[0,1])
+
+                if yC2 < yC:
+
+                    V[hi, :] = C
+                    Y[hi] = yC
+
+                else:
+
+                    for j in range(0, n + 1):
+
+                        if (j != lo):
+
+                            V[j, :] = (V[j, :] + V[lo, :]) / 2.
+                            Z = V[j, :]
+                            Y[j] = self.func(Z[0,0], Z[0,1])
+
+            mn = np.min(Y)
+            mx = np.max(Y)
+            lo = [i for i, j in enumerate(Y) if j == mn]
+            hi = [i for i, j in enumerate(Y) if j == mx]
+
+            li = hi[0] + 0
+            ho = lo[0] + 0
+
+            for j in range(0, n + 1):
+
+                if ((j != lo) & (j != hi)) & (Y[j] <= Y[li]):
+                    li = j
+
+                if ((j != hi) & (j != lo)) & (Y[j] >= Y[ho]):
+                    ho = j
+
+            P[cnt, :] = V[lo[0], :]
+            Q[cnt] = Y[lo[0]]
+
+            cnt = cnt + 1
+
+        self.xmin = P[cnt-1,:]
+        self.min = Q[cnt-1]
+
     def SteepestDescent(self):
         import numpy as np
         print 'SteepestDescent'
@@ -292,8 +412,8 @@ class OptimizationClass:
         print 'NewtonMethod'
 
 import numpy as np
-def f (x): return np.sin(np.pi*x)
+def f (x, y): return (x-2)*(x-2) + (y + 1)*(y + 1)
 
-Opt = OptimizationClass(0, .9, 1e-6, 'QuadraticInterpolation', f)
+Opt = OptimizationClass(0, .9, 1e-6, 40, 'NelderMead', f)
 Opt.optimize()
 print 'minimum =', Opt.min, 'at x =', Opt.xmin
