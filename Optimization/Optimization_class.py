@@ -7,6 +7,7 @@ class OptimizationClass:
         self.N = N
         self.method = method
         self.func = f
+        self.funcp = fp
 
     def optimize(self):
 
@@ -115,50 +116,50 @@ class OptimizationClass:
             i = i + 1
 
         n = i - 1
-        A = np.zeros((1, n-2))
-        B = np.zeros((1, n-2))
-        A[0,0] = a
-        B[0,0] = b
-        c = A[0,0] + (float(fib(n-2))/fib(n)) * (B[0,0] - A[0,0])
-        d = A[0,0] + (float(fib(n-1))/fib(n)) * (B[0,0] - A[0,0])
+        A = np.zeros((n-2, 1))
+        B = np.zeros((n-2, 1))
+        A[0] = a
+        B[0] = b
+        c = A[0] + (float(fib(n-2))/fib(n)) * (B[0] - A[0])
+        d = A[0] + (float(fib(n-1))/fib(n)) * (B[0] - A[0])
         k = 0
 
         while k < n - 3:
 
             if self.func(c) > self.func(d):
-                A[0, k + 1] = c
-                B[0, k + 1] = B[0, k]
+                A[k + 1] = c
+                B[k + 1] = B[k]
                 c = d
-                d = A[0, k+1] + (float(fib(n - k - 1))/fib(n - k)) * (B[0, k+1] - A[0, k+1])
+                d = A[k+1] + (float(fib(n - k - 1))/fib(n - k)) * (B[k+1] - A[k+1])
 
             else:
-                A[0, k+1] = A[0, k]
-                B[0, k+1] = d
+                A[k+1] = A[k]
+                B[k+1] = d
                 d = c
-                c = A[0, k+1] + (float(fib(n-k-2))/fib(n-k)) * (B[0, k+1] - A[0, k+1])
+                c = A[k+1] + (float(fib(n-k-2))/fib(n-k)) * (B[k+1] - A[k+1])
 
             k = k + 1
 
         if self.func(c) > self.func(d):
-            A[0, n-3] = c
-            B[0, n-3] = B[0, n-4]
+            A[n-3] = c
+            B[n-3] = B[n-4]
             c = d
-            d = A[0, n-3] + (0.5 + e) * (B[0, n-3] - A[0, n-3])
+            d = A[n-3] + (0.5 + e) * (B[n-3] - A[n-3])
         else:
-            A[0, n-3] = A[0, n-4]
-            B[0, n-3] = d
+            A[n-3] = A[n-4]
+            B[n-3] = d
             d = c
-            c = A[0, n-3] + (0.5 - e) * (B[0, n-3] - A[0, n-3])
+            c = A[n-3] + (0.5 - e) * (B[n-3] - A[n-3])
 
         if self.func(c) > self.func(d):
             a = c
-            b = B[0, n-3]
+            b = B[n-3]
         else:
-            a = A[0, n-3]
+            a = A[n-3]
             b = d
 
-        self.xmin = (a+b)/2
-        self.min = self.func((a+b)/2)
+        self.xmin = (a[0] + b[0])/2
+        self.min = self.func((a[0] + b[0])/2)
 
     def QuadraticInterpolation(self):
         import numpy as np
@@ -287,8 +288,7 @@ class OptimizationClass:
         Nmin = 1
         Nmax = self.N
 
-        V = np.matrix([[0., 0.], [0.1, 0.1], [1., -0.1]])
-
+        V = np.array([[0., 0.], [0.1, 0.1], [1., -0.1]])
         [mm, n] = np.shape(V)
 
         Y = np.zeros(n+1)
@@ -304,9 +304,10 @@ class OptimizationClass:
         lo = [i for i, j in enumerate(Y) if j == mn]
         hi = [i for i, j in enumerate(Y) if j == mx]
 
-
-        li = hi[0] + 0
-        ho = lo[0] + 0
+        lo = lo[0]
+        hi = hi[0]
+        li = hi + 0
+        ho = lo + 0
 
         for j in range(0, n + 1):
 
@@ -328,7 +329,7 @@ class OptimizationClass:
 
             M = (S - V[hi, :])/float(n)
             R = 2*M - V[hi, :]
-            yR = self.func(R[0,0], R[0,1])
+            yR = self.func(R[0], R[1])
 
             if (yR < Y[ho]):
 
@@ -340,7 +341,7 @@ class OptimizationClass:
                 else:
 
                     E = 2*R - M
-                    yE = self.func(E[0,0], E[0,1])
+                    yE = self.func(E[0], E[1])
 
                     if yE < Y[li]:
 
@@ -360,9 +361,9 @@ class OptimizationClass:
                     Y[hi] = yR
 
                 C = (V[hi, :] + M) / 2.
-                yC = self.func(C[0,0], C[0,1])
+                yC = self.func(C[0], C[1])
                 C2 = (M + R)/2.
-                yC2 = self.func(C2[0,0], C2[0,1])
+                yC2 = self.func(C2[0], C2[1])
 
                 if yC2 < yC:
 
@@ -377,15 +378,19 @@ class OptimizationClass:
 
                             V[j, :] = (V[j, :] + V[lo, :]) / 2.
                             Z = V[j, :]
-                            Y[j] = self.func(Z[0,0], Z[0,1])
+                            Y[j] = self.func(Z[0], Z[1])
 
             mn = np.min(Y)
             mx = np.max(Y)
+
             lo = [i for i, j in enumerate(Y) if j == mn]
             hi = [i for i, j in enumerate(Y) if j == mx]
 
-            li = hi[0] + 0
-            ho = lo[0] + 0
+            lo = lo[0]
+            hi = hi[0]
+
+            li = hi + 0
+            ho = lo + 0
 
             for j in range(0, n + 1):
 
@@ -395,25 +400,135 @@ class OptimizationClass:
                 if ((j != hi) & (j != lo)) & (Y[j] >= Y[ho]):
                     ho = j
 
-            P[cnt, :] = V[lo[0], :]
-            Q[cnt] = Y[lo[0]]
+            P[cnt, :] = V[lo, :]
+            Q[cnt] = Y[lo]
 
             cnt = cnt + 1
 
         self.xmin = P[cnt-1,:]
-        self.min = Q[cnt-1]
+        self.min  = Q[cnt-1]
 
     def SteepestDescent(self):
         import numpy as np
         print 'SteepestDescent'
+
+        def g(x): return -(1/np.linalg.norm(self.funcp(x))) * self.funcp(x)
+
+        maxj = 10
+        big = 1e8
+        h = 1
+        n = 1
+        P = np.zeros((self.N, n+1))
+        P0 = (self.maxv - self.minv)/2.
+        leng = np.linalg.norm(P0)
+        y0 = self.func(P0)
+        delta = self.tol
+
+        if (leng > 1e4):
+            h = leng/float(1e4)
+
+        err = 1
+        cond = 0
+        P[0, :] = [P0, y0]
+        cnt = 1
+        while ((self.funcp(P0) != 0) & (cnt < self.N) & (cond != 5)) & ((h > delta) | (err > self.tol)):
+
+            S = g(P0)
+            P1 = P0 + h*S
+            P2 = P0 + 2*h*S
+            y1 = self.func(P1)
+            y2 = self.func(P2)
+            cond = 0
+            j = 0
+
+            while (j < maxj) & (cond == 0):
+                leng = np.linalg.norm(P0)
+                if (y0 < y1):
+                    P2 = P1+0
+                    y2 = y1+0
+                    h = h/2.
+                    P1 = P0 + h*S
+                    y1 = self.func(P1)
+                else:
+                    if (y2 < y1):
+                        P1 = P2+0
+                        y1 = y2+0
+                        h = 2.*h
+                        P2 = P0 + 2*h*S
+                        y2 = self.func(P2)
+                    else:
+                        cond = -1
+
+                j = j+1
+                if (h < delta):
+                    cond = 1
+
+                if (np.abs(h) > big) | (leng > big):
+                    cond = 5
+
+            if (cond == 5):
+                Pmin = P1+0
+                ymin = y1+0
+
+            else:
+                d = 4*y1 - 2*y0 - 2*y2
+                if (d < 0):
+                    hmin = h * (4 * y1 - 3 * y0 - y2)/d
+                else:
+                    cond = 4
+                    hmin = h/3
+
+                Pmin = P0 + hmin*S
+                ymin = self.func(Pmin)
+                h0 = np.abs(hmin)
+                h1 = np.abs(hmin - h)
+                h2 = np.abs(hmin - 2 * h)
+
+                if (h0 < h):
+                    h = h0+0
+                if (h1 < h):
+                    h = h1+0
+                if (h2 < h):
+                    h = h2+0
+                if (h == 0):
+                    h = hmin+0
+                if (h < delta):
+                    cond = 1
+
+                e0 = np.abs(y0 - ymin)
+                e1 = np.abs(y1 - ymin)
+                e2 = np.abs(y2 - ymin)
+
+                if (e0 != 0) & (e0 < err):
+                    err = e0+0
+                if (e1 != 0) & (e1 < err):
+                    err = e1+0
+                if (e2 != 0) & (e2 < err):
+                    err = e2+0
+                if (e0 == 0) & (e1 == 0) & (e2 == 0):
+                    err = 0
+                if (err < self.tol):
+                    cond = 2
+                if (cond == 2) & (h < delta):
+                    cond = 3
+
+            P[cnt, :] = [Pmin, ymin]
+            cnt = cnt + 1
+            P0 = Pmin
+            y0 = ymin
+
+        self.xmin = Pmin
+        self.min  = ymin
 
     def Newton(self):
         import numpy as np
         print 'NewtonMethod'
 
 import numpy as np
-def f (x, y): return (x-2)*(x-2) + (y + 1)*(y + 1)
+'''def f (x, y): return (x-2)*(x-2) + (y + 1)*(y + 1)'''
+def f (x): return (x-2)**4
+def fp(x): return 4*(x-2)**3
 
-Opt = OptimizationClass(0, .9, 1e-6, 40, 'NelderMead', f)
+Opt = OptimizationClass(0, 2.1, 1e-2, 10, 'SteepestDescent', f)
 Opt.optimize()
 print 'minimum =', Opt.min, 'at x =', Opt.xmin
