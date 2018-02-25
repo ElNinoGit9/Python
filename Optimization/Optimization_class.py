@@ -524,11 +524,26 @@ class OptimizationClass:
         import numpy as np
         print 'NewtonMethod'
 
+        k = 0
+        x0 = (self.maxv + self.minv)/2.
+        X = np.zeros((self.N, 2))
+        X[0,:] = [x0, self.func(x0)]
+
+        while (k < self.N-1):
+
+            k = k+1
+            xn = x0 - self.func(x0)/self.funcp(x0)
+            x0 = xn + 0
+            X[k,:] = [x0, self.func(x0)]
+
+        self.xmin = X[-1,0]
+        self.min  = X[-1,1]
+
 import numpy as np
 '''def f (x, y): return (x-2)*(x-2) + (y + 1)*(y + 1)'''
 def f (x): return (x-2)**4
 def fp(x): return 4*(x-2)**3
 
-Opt = OptimizationClass(0, 2.1, 1e-2, 10, 'SteepestDescent', f)
+Opt = OptimizationClass(0, 2.1, 1e-2, 10, 'Newton', f)
 Opt.optimize()
 print 'minimum =', Opt.min, 'at x =', Opt.xmin
