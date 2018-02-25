@@ -1,120 +1,78 @@
-class OptimizationClass:
-    def __init__(self, minv, maxv, N, method, func):
+class ODEClass:
+    def __init__(self, minv, maxv, N, method, func, f0):
         import numpy as np
         self.minv = minv
         self.maxv = maxv
         self.N = N
         self.method = method
         self.func = f
-        self.dx = (maxv-minv)/float(N)
+        self.f0 = f0
 
-    def optimize(self):
+    def Solve(self):
 
         if self.method is 'Euler':
-            self.MidpointRule()
+            self.Euler()
         elif self.method is 'Heun':
-            self.TrapeziodalRule()
+            self.Heun()
         elif self.method is 'Taylor':
-            self.SimpsonsRule()
+            self.Taylor()
         elif self.method is 'RungeKutta4':
-            self.BoolesRule()
+            self.RungeKutta4()
         elif self.method is 'RungeKuttaFehlberg':
-            self.BoolesRule()
+            self.RungeKuttaFehlberg()
         elif self.method is 'ABMM':
-            self.GaussLegendre()
+            self.ABMM()
         elif self.method is 'MilneSimpson':
-            self.GaussLobatto()
+            self.MilneSimpson()
         elif self.method is 'Hamming':
-            self.GaussLobatto()
+            self.Hamming()
 
-    def MidpointRule(self):
+    def Euler(self):
         import numpy as np
-        print 'Midpoint rule'
+        print 'Euler'
 
-        gridMid = np.linspace(self.minv + self.dx/2., self.maxv - self.dx/2., self.N, endpoint=True)
+        h = (self.maxv - self.minv)/float(self.N)
+        y = np.zeros((self.N + 1, 1))
+        y = y[:,0]
+        t = np.linspace(self.minv, self.maxv, self.N + 1, endpoint = True)
+        y[0] = self.f0
 
-        self.I = self.dx * (np.sum(self.func(gridMid[0:])))
+        for j in range(0, self.N):
+            y[j+1] = y[j] + h*self.func(t[j], y[j])
 
-    def TrapeziodalRule(self):
+        self.Solution = [np.transpose(t), np.transpose(y)]
+
+
+    def Heun(self):
         import numpy as np
-        print 'Trapeziodal rule'
+        print 'Heun'
 
-        self.grid = np.linspace(self.minv, self.maxv, self.N + 1, endpoint=True)
-
-        self.I = self.dx * (np.sum(self.func(self.grid[1:-1])) + self.func(self.grid[0])/2. + self.func(self.grid[-1])/2.)
-
-    def SimpsonsRule(self):
+    def Taylor(self):
         import numpy as np
-        print 'Simpsons rule'
+        print 'Taylor'
 
-        self.grid = np.linspace(self.minv, self.maxv, self.N + 1, endpoint=True)
-
-        self.I = 2.*self.dx/6. * (self.func(self.grid[0]) + 4*np.sum(self.func(self.grid[1:-1:2])) + 2*np.sum(self.func(self.grid[2:-1:2])) + self.func(self.grid[-1]))
-
-    def BoolesRule(self):
+    def RungeKutta4(self):
         import numpy as np
-        print 'Booles rule'
+        print 'RungeKutta4'
 
-        self.grid = np.linspace(self.minv, self.maxv, self.N + 1, endpoint=True)
-
-        self.I = 2.*self.dx/45. * (7*self.func(self.grid[0]) + 32*np.sum(self.func(self.grid[1:-1:4])) \
-        + 12*np.sum(self.func(self.grid[2:-1:4])) + 32*np.sum(self.func(self.grid[3:-1:4])) \
-        + 14*np.sum(self.func(self.grid[4:-1:4])) + 7*self.func(self.grid[-1]))
-
-    def GaussLegendre(self):
+    def RungeKuttaFehlberg(self):
         import numpy as np
-        print 'Gauss-Legendre'
+        print 'RungaKuttaFehlberg'
 
-        if self.N == 1:
-            p = np.array([0])
-            w = np.array([2])
-        elif self.N == 2:
-            p = np.array([0.57735, -.57735])
-            w = np.array([1, 1])
-        elif self.N == 3:
-            p = np.array([0, 0.774597, -0.774597])
-            w = np.array([0.888889, 0.555556, 0.555556])
-        elif self.N == 4:
-            p = np.array([0.339981, -0.339981, 0.861136, -0.861136])
-            w = np.array([0.652145, 0.652145, 0.347855, 0.347855])
-        elif self.N == 5:
-            p = np.array([0, 0.538469, -0.538469, 0.90618, -0.90618])
-            w = np.array([0.568889, 0.478629, 0.478629, 0.236927, 0.236927])
-        else:
-            print 'number of points undefined'
-
-        a = (self.maxv - self.minv)/2.
-        b = (self.maxv + self.minv)/2.
-        self.I = a * np.dot(self.func(a*p + b), w)
-
-    def GaussLobatto(self):
+    def ABMM(self):
         import numpy as np
-        print 'Gauss-Lobatto'
+        print 'ABMM'
 
-        if self.N == 3:
-            p = np.array([0, 1, -1])
-            w = np.array([4/3., 1/3., 1/3.])
-        elif self.N == 4:
-            p = np.array([np.sqrt(1/5.), -np.sqrt(1/5.), 1, -1])
-            w = np.array([5/6., 5/6., 1/6., 1/6.])
-        elif self.N == 5:
-            p = np.array([0, np.sqrt(3./7.), -np.sqrt(3./7.), 1, -1])
-            w = np.array([32/45., 49/90., 49/90., 1/10., 1/10.])
-        elif self.N == 6:
-            p = np.array([np.sqrt(1/3. - 2*np.sqrt(7)/21.), -np.sqrt(1/3. - 2*np.sqrt(7)/21.), np.sqrt(1/3. + 2*np.sqrt(7)/21.), -np.sqrt(1/3. + 2*np.sqrt(7)/21.), 1, -1])
-            w = np.array([(14 + np.sqrt(7))/30., (14 + np.sqrt(7))/30., (14 - np.sqrt(7))/30., (14 - np.sqrt(7))/30., 1/15., 1/15.])
-        elif self.N == 7:
-            p = np.array([0, np.sqrt(5/11. - 2/11.*np.sqrt(5/3.)), -np.sqrt(5/11. - 2/11.*np.sqrt(5/3.)), np.sqrt(5/11. + 2/11.*np.sqrt(5/3.)), -np.sqrt(5/11. + 2/11.*np.sqrt(5/3.)), 1, -1])
-            w = np.array([256/525., (124 + 7*np.sqrt(15))/350., (124 + 7*np.sqrt(15))/350., (124 - 7*np.sqrt(15))/350., (124 - 7*np.sqrt(15))/350., 1/21., 1/21.])
-        else:
-            print 'number of points undefined'
+    def MilneSimpson(self):
+        import numpy as np
+        print 'MilneSimpson'
 
-        a = (self.maxv - self.minv)/2.
-        b = (self.maxv + self.minv)/2.
-        self.I = a * np.dot(self.func(a*p + b), w)
+    def Hamming(self):
+        import numpy as np
+        print 'Hamming'
 
-def f (x): return x*x*x*x
+def f (t, y): return y + t
 
-Opt = OptimizationClass(0, 1, 5, 'Lobatto', f)
-Opt.optimize()
-print Int.I
+Ode = ODEClass(0, 1, 5, 'Euler', f, 0)
+Ode.Solve()
+print Ode.Solution[1]
