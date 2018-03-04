@@ -1,78 +1,48 @@
 class ODEClass:
-    def __init__(self, minv, maxv, N, method, func, f0):
+    def __init__(self, minv, maxv, N, method, ft, f0):
         import numpy as np
         self.minv = minv
         self.maxv = maxv
         self.N = N
         self.method = method
-        self.func = f
+        self.funct = ft
         self.f0 = f0
 
     def Solve(self):
 
         if self.method is 'Euler':
-            self.Euler()
+            from Euler import Euler
+            [self.t, self.y] = Euler([self.minv, self.maxv], self.f0, self.funct, self.N)
         elif self.method is 'Heun':
-            self.Heun()
-        elif self.method is 'Taylor':
-            self.Taylor()
+            from Heun import Heun
+            [self.t, self.y] = Heun([self.minv, self.maxv], self.f0, self.funct, self.N)
         elif self.method is 'RungeKutta4':
-            self.RungeKutta4()
-        elif self.method is 'RungeKuttaFehlberg':
-            self.RungeKuttaFehlberg()
-        elif self.method is 'ABMM':
-            self.ABMM()
-        elif self.method is 'MilneSimpson':
-            self.MilneSimpson()
-        elif self.method is 'Hamming':
-            self.Hamming()
+            from RungeKutta4 import RungeKutta4
+            [self.t, self.y] = RungeKutta4([self.minv, self.maxv], self.f0, self.funct, self.N)
+        elif self.method is 'Leapfrog':
+            from Leapfrog import Leapfrog
+            [self.t, self.y] = Leapfrog([self.minv, self.maxv], self.f0, self.funct, self.N)
+        elif self.method is 'TrapezoidalRule':
+            from TrapezoidalRule import TrapezoidalRule
+            [self.t, self.y] = TrapezoidalRule([self.minv, self.maxv], self.f0, self.funct, self.N)
+        elif self.method is 'MidpointMethod':
+            from MidpointMethod import MidpointMethod
+            [self.t, self.y] = MidpointMethod([self.minv, self.maxv], self.f0, self.funct, self.N)
 
-    def Euler(self):
-        import numpy as np
-        print 'Euler'
-
-        h = (self.maxv - self.minv)/float(self.N)
-        y = np.zeros((self.N + 1, 1))
-        y = y[:,0]
-        t = np.linspace(self.minv, self.maxv, self.N + 1, endpoint = True)
-        y[0] = self.f0
-
-        for j in range(0, self.N):
-            y[j+1] = y[j] + h*self.func(t[j], y[j])
-
-        self.Solution = [np.transpose(t), np.transpose(y)]
-
-
-    def Heun(self):
-        import numpy as np
-        print 'Heun'
-
-    def Taylor(self):
-        import numpy as np
-        print 'Taylor'
-
-    def RungeKutta4(self):
-        import numpy as np
-        print 'RungeKutta4'
-
-    def RungeKuttaFehlberg(self):
+    def Leapfrog(self):
         import numpy as np
         print 'RungaKuttaFehlberg'
 
-    def ABMM(self):
+    def TrapezoidalRule(self):
         import numpy as np
         print 'ABMM'
 
-    def MilneSimpson(self):
+    def MidpointMethod(self):
         import numpy as np
         print 'MilneSimpson'
 
-    def Hamming(self):
-        import numpy as np
-        print 'Hamming'
+def ft(t, y): return y + t
 
-def f (t, y): return y + t
-
-Ode = ODEClass(0, 1, 5, 'Euler', f, 0)
+Ode = ODEClass(0, 1, 500, 'RungeKutta4', ft, 0)
 Ode.Solve()
-print Ode.Solution[1]
+print Ode.t, Ode.y
