@@ -1,33 +1,39 @@
 class InterpolationClass:
-    def __init__(self, N, method, f, fp, tol):
+    def __init__(self, x0, y0, xn, method):
         import numpy as np
-        self.N = N
+        self.x0 = x0
+        self.y0 = y0
+        self.xn = xn
         self.method = method
-        self.f = f
 
     def Solve(self):
 
-        if self.method is 'Lagrange':
-            self.Lagrange()
-        elif self.method is 'Newton':
-            self.Newton()
-        elif self.method is 'Chebyshev':
-            self.Chebyshev()
+        if self.method is 'Constant':
+            from Constant import Constant
+            self.yn = Constant(self.x0, self.y0, self.xn)
+        elif self.method is 'Linear':
+            from Linear import Linear
+            self.yn = Linear(self.x0, self.y0, self.xn)
+        elif self.method is 'Polynomial':
+            from Polynomial import Polynomial
+            self.yn = Polynomial(self.x0, self.y0, self.xn)
+        elif self.method is 'Splines':
+            from Splines import Splines
+            self.yn = Splines(self.x0, self.y0, self.xn)
 
-    def Lagrange(self):
-        import numpy as np
-        print 'Lagrange'
+import matplotlib.pyplot as plt
+import numpy as np
+from math import *
 
-    def Newton(self):
-        import numpy as np
-        print 'Newton'
+def f(x): return np.sin(pi*x)
+x0 = np.linspace(-1,1,5, endpoint = True)
+y0 = f(x0)
+xn = np.linspace(-1,1,100, endpoint = True)
 
-    def Chebyshev(self):
-        import numpy as np
-        print 'Chebyshev'
-
-def f (x): return x**3 - 27
-
-Int = InterpolationClass('Lagrange', f)
+Int = InterpolationClass(x0, y0, xn, 'Polynomial')
 Int.Solve()
-print Int.x_n
+plt.plot(Int.xn, Int.yn)
+plt.show()
+
+plt.plot(Int.xn, f(Int.xn))
+plt.show()
