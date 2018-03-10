@@ -26,14 +26,18 @@ import numpy as np
 from math import *
 
 def f(x): return np.sin(pi*x)
-x0 = np.linspace(-1,1,5, endpoint = True)
+x0 = np.linspace(-4,4,20, endpoint = True)
 y0 = f(x0)
-xn = np.linspace(-1,1,100, endpoint = True)
+xn = np.linspace(-4,4,100, endpoint = True)
 
 Int = InterpolationClass(x0, y0, xn, 'Polynomial')
 Int.Solve()
+
 plt.plot(Int.xn, Int.yn)
 plt.show()
 
 plt.plot(Int.xn, f(Int.xn))
+plt.show()
+
+plt.plot(Int.xn, f(Int.xn), Int.xn, Int.yn)
 plt.show()
