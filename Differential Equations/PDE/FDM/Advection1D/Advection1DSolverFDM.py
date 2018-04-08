@@ -19,12 +19,10 @@ class gridClass:
         plt.plot(np.zeros(self.Nx+1), self.x)
 
 class problemClass:
-    def __init__(self, grid):
+    def __init__(self, a):
         import numpy as np
 
-        def a_func (x):  return (2 + 1*x)
-
-        self.A  = np.diag(a_func(grid.x))
+        self.A = a
 
 class SchemeClass:
     def __init__(self, problem, method):
@@ -34,19 +32,38 @@ class SchemeClass:
         if method is 'LaxWendroff':
             from LaxWendroff import LaxWendroff
             self.method = LaxWendroff
-            self.methodname = 'Lax Wendroff'
+            self.methodName = 'Lax Wendroff'
+
         elif method is 'LaxFriedrich':
             from LaxFriedrich import LaxFriedrich
             self.method = LaxFriedrich
-            self.methodname = 'Lax Friedrich'
+            self.methodName = 'Lax Friedrich'
+            self.methodSolver = 'Explicit'
         elif method is 'MacCormack':
             from MacCormack import MacCormack
             self.method = MacCormack
-            self.methodname = 'MacCormack'
+            self.methodName = 'MacCormack'
+            self.methodSolver = 'Explicit'
         elif method is 'ForwardTimeBackwardSpace':
             from ForwardTimeBackwardSpace import ForwardTimeBackwardSpace
             self.method = ForwardTimeBackwardSpace
-            self.methodname = 'Forward time backward space'
+            self.methodName = 'Forward time backward space'
+            self.methodSolver = 'Explicit'
+        elif method is 'ForwardTimeForwardSpace':
+            from ForwardTimeForwardSpace import ForwardTimeForwardSpace
+            self.method = ForwardTimeForwardSpace
+            self.methodName = 'Forward time forward space'
+            self.methodSolver = 'Explicit'
+        elif method is 'BackwardTimeForwardSpace':
+            from BackwardTimeForwardSpace import BackwardTimeForwardSpace
+            self.method = BackwardTimeForwardSpace
+            self.methodName = 'Backward time forward space'
+            self.methodSolver = 'Implicit'
+        elif method is 'BackwardTimeBackwardSpace':
+            from BackwardTimeBackwardSpace import BackwardTimeBackwardSpace
+            self.method = BackwardTimeBackwardSpace
+            self.methodName = 'Backward time backward space'
+            self.methodSolver = 'Implicit'
 
 
     def Scheme(self, grid, problem):
@@ -58,22 +75,45 @@ class SchemeClass:
         from matplotlib import animation
 
         solver = self.method
-        def u_a(x, t): return np.sin(2*pi*(x - t))
-        def g(t):      return u_a(0, t)
+        def u_a(x, t): return np.sin(2*pi*(x - problem.A*t))
+        def g0(t):     return u_a(0, t)
+        def g1(t):     return u_a(1, t)
+        def f(x):      return u_a(x, 0)
 
-        A = 1
+        A = problem.A
         self.un = np.zeros((grid.Nx + 1, grid.Nt + 1))
         self.un[:, 0] = u_a(grid.x, 0) # initial condition
 
         C =  grid.dt * A / grid.dx
 
-        for n in range(0, grid.Nt):
+        if self.methodSolver is 'Explicit':
+            for n in range(1, grid.Nt):
 
-            u_bc = interpolate.interp1d(grid.x[-2:], self.un[-2:, n]) # interplate at right bndry
-            self.un[0, n] = g(grid.dt*n) # boundary condition
-            self.un[1:-1, n+1] = solver(self.un[:, n], C)
-            self.un[-1, n+1] = u_bc(grid.x[-1] - A*grid.dt) # interpolate along a characteristic to find the boundary value
+                if A > 0:
+                    u_bc = interpolate.interp1d(grid.x[-2:], self.un[-2:, n])
+                    self.un[0, n] = g0(grid.dt*n)
+                elif A < 0:
+                    u_bc = interpolate.interp1d(grid.x[:2], self.un[:2, n])
+                    self.un[-1, n] = g1(grid.dt*n)
 
+                    self.un[1:-1, n+1] = solver(self.un[:, n], C)
+
+                if A > 0:
+                    self.un[0, n+1] = u_bc(grid.x[-1] - A*grid.dt)
+                elif A < 0:
+                    self.un[0, n+1] = u_bc(grid.x[1] + A*grid.dt)
+
+        elif self.methodSolver is 'Implicit':
+
+                if A > 0:
+                    [D, H] = solver(grid.Nx, grid.Nt, grid.x, grid.t, A, grid.dt, grid.dx, f, g0)
+                elif A < 0:
+                    [D, H] = solver(grid.Nx, grid.Nt, grid.x, grid.t, A, grid.dt, grid.dx, f, g1)
+
+
+                self.un = np.linalg.solve(D,H)
+                self.un = self.un.reshape(grid.Nt+1, grid.Nx+1)
+                self.un = np.transpose(self.un)
 
         plt.show()
         fig = plt.figure()
@@ -85,7 +125,7 @@ class SchemeClass:
 
         line, = ax.plot([], [])
         lines.append(line)
-        legends.append(self.methodname)
+        legends.append(self.methodName)
 
         line, = ax.plot([], []) #add extra plot line for analytical solution
         lines.append(line)
@@ -128,10 +168,10 @@ class SchemeClass:
 
         print self.error_L2
 
-g = gridClass([0, 0], [1, 1], [80, 200])
+g = gridClass([0, 0], [1, 1], [100, 100])
 
-p = problemClass(g)
+p = problemClass(1)
 
-s = SchemeClass(p, 'ForwardTimeBackwardSpace')
+s = SchemeClass(p, 'BackwardTimeBackwardSpace')
 s.Scheme(g, p)
 #s.Error(g, p)
