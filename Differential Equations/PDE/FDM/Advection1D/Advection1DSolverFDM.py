@@ -33,7 +33,6 @@ class SchemeClass:
             from LaxWendroff import LaxWendroff
             self.method = LaxWendroff
             self.methodName = 'Lax Wendroff'
-
         elif method is 'LaxFriedrich':
             from LaxFriedrich import LaxFriedrich
             self.method = LaxFriedrich
@@ -54,6 +53,11 @@ class SchemeClass:
             self.method = ForwardTimeForwardSpace
             self.methodName = 'Forward time forward space'
             self.methodSolver = 'Explicit'
+        elif method is 'ForwardTimeCentralSpace':
+            from ForwardTimeCentralSpace import ForwardTimeCentralSpace
+            self.method = ForwardTimeCentralSpace
+            self.methodName = 'Forward time central space'
+            self.methodSolver = 'Explicit'
         elif method is 'BackwardTimeForwardSpace':
             from BackwardTimeForwardSpace import BackwardTimeForwardSpace
             self.method = BackwardTimeForwardSpace
@@ -64,7 +68,16 @@ class SchemeClass:
             self.method = BackwardTimeBackwardSpace
             self.methodName = 'Backward time backward space'
             self.methodSolver = 'Implicit'
-
+        elif method is 'BackwardTimeCentralSpace':
+            from BackwardTimeCentralSpace import BackwardTimeCentralSpace
+            self.method = BackwardTimeCentralSpace
+            self.methodName = 'Backward time central space'
+            self.methodSolver = 'Implicit'
+        elif method is 'Leapfrog':
+            from Leapfrog import Leapfrog
+            self.method = Leapfrog
+            self.methodName = 'Leapfrog'
+            self.methodSolver = 'Implicit'
 
     def Scheme(self, grid, problem):
         print 'Create scheme'
@@ -168,10 +181,10 @@ class SchemeClass:
 
         print self.error_L2
 
-g = gridClass([0, 0], [1, 1], [100, 100])
+g = gridClass([0, 0], [1, 1], [50, 50])
 
-p = problemClass(1)
+p = problemClass(-2)
 
-s = SchemeClass(p, 'BackwardTimeBackwardSpace')
+s = SchemeClass(p, 'Leapfrog')
 s.Scheme(g, p)
 #s.Error(g, p)
