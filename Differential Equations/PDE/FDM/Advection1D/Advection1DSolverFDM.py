@@ -78,6 +78,11 @@ class SchemeClass:
             self.method = Leapfrog
             self.methodName = 'Leapfrog'
             self.methodSolver = 'Implicit'
+        elif method is 'CrankNicolson':
+            from CrankNicolson import CrankNicolson
+            self.method = CrankNicolson
+            self.methodName = 'CrankNicolson'
+            self.methodSolver = 'Implicit'
 
     def Scheme(self, grid, problem):
         print 'Create scheme'
@@ -181,10 +186,10 @@ class SchemeClass:
 
         print self.error_L2
 
-g = gridClass([0, 0], [1, 1], [50, 50])
+g = gridClass([0, 0], [1, 1], [100, 100])
 
-p = problemClass(-2)
+p = problemClass(1)
 
-s = SchemeClass(p, 'Leapfrog')
+s = SchemeClass(p, 'CrankNicolson')
 s.Scheme(g, p)
 #s.Error(g, p)
