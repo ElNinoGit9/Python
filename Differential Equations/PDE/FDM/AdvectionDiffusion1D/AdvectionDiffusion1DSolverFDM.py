@@ -19,35 +19,33 @@ class gridClass:
         plt.plot(np.zeros(self.Nx+1), self.x)
 
 class problemClass:
-    def __init__(self, grid):
+    def __init__(self, a, b):
         import numpy as np
 
-        def a_func (x):  return (2 + 1*x)
-
-        self.A  = np.diag(a_func(grid.x))
+        self.A = a
+        self.B = b
 
 class SchemeClass:
     def __init__(self, problem, method):
 
         self.A  = problem.A
+        self.B  = problem.B
 
-        if method is 'LaxWendroff':
-            from LaxWendroff import LaxWendroff
-            self.method = LaxWendroff
-            self.methodname = 'Lax Wendroff'
-        elif method is 'LaxFriedrich':
-            from LaxFriedrich import LaxFriedrich
-            self.method = LaxFriedrich
-            self.methodname = 'Lax Friedrich'
-        elif method is 'MacCormack':
-            from MacCormack import MacCormack
-            self.method = MacCormack
-            self.methodname = 'MacCormack'
-        elif method is 'ForwardTimeBackwardSpace':
-            from ForwardTimeBackwardSpace import ForwardTimeBackwardSpace
-            self.method = ForwardTimeBackwardSpace
-            self.methodname = 'Forward time backward space'
-
+        if method is 'Upwind':
+            from Upwind import Upwind
+            self.method = Upwind
+            self.methodname = 'Upwind'
+            self.methodSolver = 'Explicit'
+        if method is 'Downwind':
+            from Downwind import Downwind
+            self.method = Downwind
+            self.methodname = 'Downwind'
+            self.methodSolver = 'Explicit'
+        elif method is 'ForwardTimeCentralSpace':
+            from ForwardTimeCentralSpace import ForwardTimeCentralSpace
+            self.method = ForwardTimeCentralSpace
+            self.methodname = 'Forward time central space'
+            self.methodSolver = 'Explicit'
 
     def Scheme(self, grid, problem):
         print 'Create scheme'
@@ -58,22 +56,27 @@ class SchemeClass:
         from matplotlib import animation
 
         solver = self.method
-        def u_a(x, t): return np.sin(2*pi*(x - t))
-        def g(t):      return u_a(0, t)
+        A = problem.A
+        B = problem.B
+        def u_a(x, t): return np.sin(2*pi*(x - A * t))*np.exp(-B*2*pi*2*pi*t)
+        def g(x,t):    return u_a(x, t)
+        def f(x):      return u_a(x, 0)
 
-        A = 1
+
         self.un = np.zeros((grid.Nx + 1, grid.Nt + 1))
-        self.un[:, 0] = u_a(grid.x, 0) # initial condition
+        self.un[:, 0] = u_a(grid.x, 0)
 
-        C =  grid.dt * A / grid.dx
+        C = grid.dt * A / (grid.dx)
+        D = grid.dt * B / (grid.dx * grid.dx)
 
-        for n in range(0, grid.Nt):
+        if self.methodSolver is 'Explicit':
 
-            u_bc = interpolate.interp1d(grid.x[-2:], self.un[-2:, n]) # interplate at right bndry
-            self.un[0, n] = g(grid.dt*n) # boundary condition
-            self.un[1:-1, n+1] = solver(self.un[:, n], C)
-            self.un[-1, n+1] = u_bc(grid.x[-1] - A*grid.dt) # interpolate along a characteristic to find the boundary value
+            for n in range(0, grid.Nt):
 
+                self.un[ 0, n] = g(0, grid.dt*n)
+                self.un[-1, n] = g(1, grid.dt*n)
+
+                self.un[1:-1, n+1] = solver(self.un[:, n], C, D)
 
         plt.show()
         fig = plt.figure()
@@ -128,10 +131,10 @@ class SchemeClass:
 
         print self.error_L2
 
-g = gridClass([0, 0], [1, 1], [80, 200])
+g = gridClass([0, 0], [1, 1], [70, 200])
 
-p = problemClass(g)
+p = problemClass(1, 0.01)
 
-s = SchemeClass(p, 'ForwardTimeBackwardSpace')
+s = SchemeClass(p, 'Upwind')
 s.Scheme(g, p)
 #s.Error(g, p)
