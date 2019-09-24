@@ -1,6 +1,6 @@
 def GaussLegendre(interval, f, N):
+    ''' Gauss-Legendre '''
     import numpy as np
-    print 'Gauss-Legendre'
 
     if N == 1:
         p = np.array([0])
@@ -18,7 +18,7 @@ def GaussLegendre(interval, f, N):
         p = np.array([0, 0.538469, -0.538469, 0.90618, -0.90618])
         w = np.array([0.568889, 0.478629, 0.478629, 0.236927, 0.236927])
     else:
-        print 'number of points undefined'
+        print('number of points undefined')
 
     a = (interval[1] - interval[0])/2.
     b = (interval[1] + interval[0])/2.

@@ -1,6 +1,7 @@
 def Bisection(interval, N, f):
+    ''' Bisection '''
     import numpy as np
-    print 'Bisection'
+
 
     upper = interval[1]
     lower = interval[0]

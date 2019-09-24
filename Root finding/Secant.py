@@ -1,6 +1,6 @@
 def Secant(interval, N, f):
+    ''' Secant method '''
     import numpy as np
-    print 'Secant'
 
     upper = interval[1]
     lower = interval[0]

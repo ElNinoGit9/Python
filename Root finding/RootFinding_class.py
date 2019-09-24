@@ -27,10 +27,10 @@ class RootFindingClass:
             from Brent import Brent
             self.x_n = Brent([self.minv, self.maxv], self.N, self.f, self.tol)
 
-def f (x): return x**3 - 27
-def fp(x): return 3*x**2
-
-Eqn = RootFindingClass(1, 10, 10, 'Brent', f, fp, 1e-4)
-Eqn.Solve()
-
-print Eqn.x_n
+#def f (x): return x**3 - 27
+#def fp(x): return 3*x**2
+#
+#Eqn = RootFindingClass(1, 10, 10, 'Brent', f, fp, 1e-4)
+#Eqn.Solve()
+#
+#print Eqn.x_n

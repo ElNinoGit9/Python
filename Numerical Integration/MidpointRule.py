@@ -1,6 +1,6 @@
 def MidpointRule(interval, f, N):
+    ''' Midpoint rule '''
     import numpy as np
-    print 'Midpoint rule'
 
     h = (interval[1] - interval[0])/float(N)
 

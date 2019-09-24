@@ -1,6 +1,6 @@
 def NewtonRaphson(interval, N, f, fp):
+    ''' Newton Raphson '''
     import numpy as np
-    print 'Newton Rhapson'
 
     xp = (interval[1] + interval[0])/2
     X = []

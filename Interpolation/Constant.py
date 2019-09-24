@@ -13,14 +13,11 @@ def Constant(x0, y0, xn):
 
     for j in range(0, NN):
 
-        print j
-
         for i in range(k, N0):
 
             if (xn[j] > x0[i] - h[i]/2.) & (xn[j] < x0[i] + h[i+1]/2.):
                 yn[j] = y0[i] + 0
                 k = i + 0
-                print i
                 break
 
     return yn

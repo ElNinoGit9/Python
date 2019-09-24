@@ -1,7 +1,7 @@
 def Romberg(interval, f, N, tol):
+    ''' Romberg integration '''
     import numpy as np
     import math
-    print 'Romberg integration'
 
     M = 1
     h = interval[1] - interval[0]

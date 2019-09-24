@@ -1,6 +1,6 @@
 def SimpsonsRule(interval, f, N):
+    ''' Simpsons rule '''
     import numpy as np
-    print 'Simpsons rule'
 
     h = (interval[1] - interval[0])/float(N)
 

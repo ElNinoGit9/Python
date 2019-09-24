@@ -1,6 +1,6 @@
 def GaussLobatto(interval, f, N):
+    ''' Gauss-Lobatto '''
     import numpy as np
-    print 'Gauss-Lobatto'
 
     if N == 3:
         p = np.array([0, 1, -1])
@@ -18,7 +18,7 @@ def GaussLobatto(interval, f, N):
         p = np.array([0, np.sqrt(5/11. - 2/11.*np.sqrt(5/3.)), -np.sqrt(5/11. - 2/11.*np.sqrt(5/3.)), np.sqrt(5/11. + 2/11.*np.sqrt(5/3.)), -np.sqrt(5/11. + 2/11.*np.sqrt(5/3.)), 1, -1])
         w = np.array([256/525., (124 + 7*np.sqrt(15))/350., (124 + 7*np.sqrt(15))/350., (124 - 7*np.sqrt(15))/350., (124 - 7*np.sqrt(15))/350., 1/21., 1/21.])
     else:
-        print 'number of points undefined'
+        print('number of points undefined')
 
     a = (interval[1] - interval[0])/2.
     b = (interval[1] + interval[0])/2.

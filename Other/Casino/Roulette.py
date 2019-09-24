@@ -27,9 +27,3 @@ class Roulette:
                 account[i][j] = balance + pot
 
         return account
-
-    def plotSolutions(self):
-        return t**2
-
-    def boundaryData_West(t):
-        return t**2

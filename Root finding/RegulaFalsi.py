@@ -1,6 +1,6 @@
 def RegulaFalsi(interval, N, f):
+    ''' Regula Falsi '''
     import numpy as np
-    print 'Regula Falsi'
 
     upper = interval[1]
     lower = interval[0]

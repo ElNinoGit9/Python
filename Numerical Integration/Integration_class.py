@@ -1,5 +1,5 @@
 class IntegrationClass:
-    def __init__(self, minv, maxv, N, method, func, tol):
+    def __init__(self, minv, maxv, N, method, f, tol):
         import numpy as np
         self.minv = minv
         self.maxv = maxv
@@ -33,8 +33,8 @@ class IntegrationClass:
             self.I = Romberg([self.minv, self.maxv], self.func, self.N, self.tol)
 
 
-def f (x): return x*x*x*x
+#def f (x): return x*x*x*x
 
-Int = IntegrationClass(0, 1, 12, 'BoolesRule', f, 0.001)
-Int.integrate()
-print Int.I
+#Int = IntegrationClass(0, 1, 12, 'BoolesRule', f, 0.001)
+#Int.integrate()
+#print Int.I

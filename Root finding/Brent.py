@@ -1,6 +1,6 @@
 def Brent(interval, N, f, tol):
+    ''' Brent '''
     import numpy as np
-    print 'Brent'
 
     a = interval[1]
     b = interval[0]

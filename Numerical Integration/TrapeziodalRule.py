@@ -1,6 +1,6 @@
 def TrapeziodalRule(interval, f, N):
+    ''' Trapeziodal rule '''
     import numpy as np
-    print 'Trapeziodal rule'
 
     h = (interval[1] - interval[0])/float(N)
 

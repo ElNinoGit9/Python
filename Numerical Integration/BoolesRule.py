@@ -1,6 +1,6 @@
 def BoolesRule(interval, f, N):
+    ''' Booles rule '''
     import numpy as np
-    print 'Booles rule'
 
     h = (interval[1] - interval[0])/float(N)
 
